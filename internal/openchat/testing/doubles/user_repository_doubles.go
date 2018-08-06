@@ -13,3 +13,7 @@ func NewUserRepositorySpy() *UserRepositorySpy {
 func (r *UserRepositorySpy) Create(user openchat.User) {
 	r.CreatedUser = user
 }
+
+func (r *UserRepositorySpy) FindByUsername(username string) openchat.User {
+	return r.CreatedUser
+}

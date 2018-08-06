@@ -10,11 +10,12 @@ import (
 
 func TestCreateUserService(t *testing.T) {
 	type fixture struct {
-		userRepository *doubles.UserRepositorySpy
-		service        *CreateUserService
-		input          CreateUserInput
-		successOutput  CreateUserOutput
-		user           openchat.User
+		userRepository      *doubles.UserRepositorySpy
+		service             *CreateUserService
+		input               CreateUserInput
+		successOutput       CreateUserOutput
+		usernameTakenOutput CreateUserOutput
+		user                openchat.User
 	}
 
 	setup := func() *fixture {
@@ -35,18 +36,24 @@ func TestCreateUserService(t *testing.T) {
 		}
 
 		successOutput := CreateUserOutput{
-			Status:   "SUCCESS",
+			Status:   StatusSuccess,
 			ID:       uuid,
 			Username: "username",
 			About:    "about",
 		}
 
+		usernameTakenOutput := CreateUserOutput{
+			Status:  StatusError,
+			Message: "Username already taken.",
+		}
+
 		return &fixture{
-			userRepository: userRepository,
-			service:        service,
-			input:          input,
-			user:           user,
-			successOutput:  successOutput,
+			userRepository:      userRepository,
+			service:             service,
+			input:               input,
+			user:                user,
+			successOutput:       successOutput,
+			usernameTakenOutput: usernameTakenOutput,
 		}
 	}
 
@@ -60,5 +67,12 @@ func TestCreateUserService(t *testing.T) {
 		f := setup()
 		output := f.service.Run(f.input)
 		assert.Equal(t, f.successOutput, output)
+	})
+
+	t.Run("Return error message when username has already been taken", func(t *testing.T) {
+		f := setup()
+		f.userRepository.Create(f.user)
+		output := f.service.Run(f.input)
+		assert.Equal(t, f.usernameTakenOutput, output)
 	})
 }

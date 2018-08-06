@@ -2,6 +2,11 @@ package services
 
 import "github.com/geisonbiazus/openchat/internal/openchat"
 
+const (
+	StatusSuccess = "SUCCESS"
+	StatusError   = "ERROR"
+)
+
 type CreateUserInput struct {
 	Username string
 	Password string
@@ -13,6 +18,7 @@ type CreateUserOutput struct {
 	ID       string
 	Username string
 	About    string
+	Message  string
 }
 
 type CreateUserService struct {
@@ -31,6 +37,11 @@ func NewCreateUserService(
 
 func (s *CreateUserService) Run(input CreateUserInput) CreateUserOutput {
 	user := s.newUser(input)
+
+	if s.usernameIsTaken(user.Username) {
+		return s.buildUsernameTakenOutput()
+	}
+
 	s.UserRepository.Create(user)
 	return s.buildSuccessOutput(user)
 }
@@ -44,11 +55,23 @@ func (s *CreateUserService) newUser(input CreateUserInput) openchat.User {
 	}
 }
 
+func (s *CreateUserService) usernameIsTaken(username string) bool {
+	user := s.UserRepository.FindByUsername(username)
+	return user != openchat.NoUser
+}
+
 func (s *CreateUserService) buildSuccessOutput(user openchat.User) CreateUserOutput {
 	return CreateUserOutput{
-		Status:   "SUCCESS",
+		Status:   StatusSuccess,
 		ID:       user.ID,
 		Username: user.Username,
 		About:    user.About,
+	}
+}
+
+func (s *CreateUserService) buildUsernameTakenOutput() CreateUserOutput {
+	return CreateUserOutput{
+		Status:  StatusError,
+		Message: "Username already taken.",
 	}
 }

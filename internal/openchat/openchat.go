@@ -7,8 +7,11 @@ type User struct {
 	About    string
 }
 
+var NoUser = User{}
+
 type UserRepository interface {
 	Create(user User)
+	FindByUsername(username string) User
 }
 
 type IDGenerator interface {
