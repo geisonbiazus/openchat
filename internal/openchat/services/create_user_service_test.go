@@ -13,6 +13,7 @@ func TestCreateUserService(t *testing.T) {
 		userRepository *doubles.UserRepositorySpy
 		service        *CreateUserService
 		input          CreateUserInput
+		successOutput  CreateUserOutput
 		user           openchat.User
 	}
 
@@ -33,11 +34,19 @@ func TestCreateUserService(t *testing.T) {
 			About:    "about",
 		}
 
+		successOutput := CreateUserOutput{
+			Status:   "SUCCESS",
+			ID:       uuid,
+			Username: "username",
+			About:    "about",
+		}
+
 		return &fixture{
 			userRepository: userRepository,
 			service:        service,
 			input:          input,
 			user:           user,
+			successOutput:  successOutput,
 		}
 	}
 
@@ -45,5 +54,11 @@ func TestCreateUserService(t *testing.T) {
 		f := setup()
 		f.service.Run(f.input)
 		assert.Equal(t, f.userRepository.CreatedUser, f.user)
+	})
+
+	t.Run("Return the created user data", func(t *testing.T) {
+		f := setup()
+		output := f.service.Run(f.input)
+		assert.Equal(t, f.successOutput, output)
 	})
 }
