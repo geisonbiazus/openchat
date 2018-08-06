@@ -10,11 +10,15 @@ type CreateUserInput struct {
 
 type CreateUserService struct {
 	UserRepository openchat.UserRepository
+	IDGenerator    openchat.IDGenerator
 }
 
-func NewCreateUserService(userRepository openchat.UserRepository) *CreateUserService {
+func NewCreateUserService(
+	idGen openchat.IDGenerator, userRep openchat.UserRepository,
+) *CreateUserService {
 	return &CreateUserService{
-		UserRepository: userRepository,
+		IDGenerator:    idGen,
+		UserRepository: userRep,
 	}
 }
 
@@ -24,6 +28,7 @@ func (s *CreateUserService) Run(input CreateUserInput) {
 
 func (s *CreateUserService) newUser(input CreateUserInput) openchat.User {
 	return openchat.User{
+		ID:       s.IDGenerator.Generate(),
 		Username: input.Username,
 		Password: input.Password,
 		About:    input.About,

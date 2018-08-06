@@ -17,13 +17,16 @@ func TestCreateUserService(t *testing.T) {
 	}
 
 	setup := func() *fixture {
+		uuid := "a6c3f22d-d67e-4973-a98e-2026a56b3116"
 		userRepository := doubles.NewUserRepositorySpy()
 		user := openchat.User{
+			ID:       uuid,
 			Username: "username",
 			Password: "password",
 			About:    "about",
 		}
-		service := NewCreateUserService(userRepository)
+		idGenerator := doubles.NewIDGeneratorStub(uuid)
+		service := NewCreateUserService(idGenerator, userRepository)
 		input := CreateUserInput{
 			Username: "username",
 			Password: "password",
