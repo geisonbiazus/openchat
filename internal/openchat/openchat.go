@@ -22,3 +22,15 @@ type Error struct {
 	Field string
 	Type  string
 }
+
+type ErrorsBuilder struct {
+	Errors []Error
+}
+
+func NewErrorsBuilder() *ErrorsBuilder {
+	return &ErrorsBuilder{}
+}
+
+func (e *ErrorsBuilder) Add(field, error_type string) {
+	e.Errors = append(e.Errors, Error{Field: field, Type: error_type})
+}

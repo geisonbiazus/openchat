@@ -38,8 +38,8 @@ func NewCreateUserService(
 func (s *CreateUserService) Run(input CreateUserInput) CreateUserOutput {
 	user := s.newUser(input)
 
-	if s.usernameIsTaken(user.Username) {
-		return s.buildUsernameTakenOutput()
+	if errors := s.validateUser(user); len(errors) > 0 {
+		return s.buildInvalidOutput(errors)
 	}
 
 	s.UserRepository.Create(user)
@@ -55,9 +55,34 @@ func (s *CreateUserService) newUser(input CreateUserInput) openchat.User {
 	}
 }
 
+func (s *CreateUserService) validateUser(user openchat.User) []openchat.Error {
+	builder := openchat.NewErrorsBuilder()
+
+	if user.Username == "" {
+		builder.Add("username", "REQUIRED")
+	}
+
+	if user.Password == "" {
+		builder.Add("password", "REQUIRED")
+	}
+
+	if s.usernameIsTaken(user.Username) {
+		builder.Add("username", "ALREADY_TAKEN")
+	}
+
+	return builder.Errors
+}
+
 func (s *CreateUserService) usernameIsTaken(username string) bool {
 	user := s.UserRepository.FindByUsername(username)
 	return user != openchat.NoUser
+}
+
+func (s *CreateUserService) buildInvalidOutput(errors []openchat.Error) CreateUserOutput {
+	return CreateUserOutput{
+		Status: StatusError,
+		Errors: errors,
+	}
 }
 
 func (s *CreateUserService) buildSuccessOutput(user openchat.User) CreateUserOutput {
@@ -66,14 +91,5 @@ func (s *CreateUserService) buildSuccessOutput(user openchat.User) CreateUserOut
 		ID:       user.ID,
 		Username: user.Username,
 		About:    user.About,
-	}
-}
-
-func (s *CreateUserService) buildUsernameTakenOutput() CreateUserOutput {
-	return CreateUserOutput{
-		Status: StatusError,
-		Errors: []openchat.Error{
-			openchat.Error{Field: "username", Type: "ALREADY_TAKEN"},
-		},
 	}
 }

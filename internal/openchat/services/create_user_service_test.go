@@ -10,12 +10,14 @@ import (
 
 func TestCreateUserService(t *testing.T) {
 	type fixture struct {
-		userRepository      *doubles.UserRepositorySpy
-		service             *CreateUserService
-		input               CreateUserInput
-		successOutput       CreateUserOutput
-		usernameTakenOutput CreateUserOutput
-		user                openchat.User
+		userRepository       *doubles.UserRepositorySpy
+		service              *CreateUserService
+		input                CreateUserInput
+		emptyInput           CreateUserInput
+		successOutput        CreateUserOutput
+		usernameTakenOutput  CreateUserOutput
+		requiredFieldsOutput CreateUserOutput
+		user                 openchat.User
 	}
 
 	setup := func() *fixture {
@@ -35,6 +37,8 @@ func TestCreateUserService(t *testing.T) {
 			About:    "about",
 		}
 
+		emptyInput := CreateUserInput{}
+
 		successOutput := CreateUserOutput{
 			Status:   StatusSuccess,
 			ID:       uuid,
@@ -49,13 +53,23 @@ func TestCreateUserService(t *testing.T) {
 			},
 		}
 
+		requiredFieldsOutput := CreateUserOutput{
+			Status: StatusError,
+			Errors: []openchat.Error{
+				openchat.Error{Field: "username", Type: "REQUIRED"},
+				openchat.Error{Field: "password", Type: "REQUIRED"},
+			},
+		}
+
 		return &fixture{
-			userRepository:      userRepository,
-			service:             service,
-			input:               input,
-			user:                user,
-			successOutput:       successOutput,
-			usernameTakenOutput: usernameTakenOutput,
+			userRepository:       userRepository,
+			service:              service,
+			input:                input,
+			emptyInput:           emptyInput,
+			user:                 user,
+			successOutput:        successOutput,
+			usernameTakenOutput:  usernameTakenOutput,
+			requiredFieldsOutput: requiredFieldsOutput,
 		}
 	}
 
@@ -76,5 +90,11 @@ func TestCreateUserService(t *testing.T) {
 		f.userRepository.Create(f.user)
 		output := f.service.Run(f.input)
 		assert.DeepEqual(t, f.usernameTakenOutput, output)
+	})
+
+	t.Run("Return error messages for required fields", func(t *testing.T) {
+		f := setup()
+		output := f.service.Run(f.emptyInput)
+		assert.DeepEqual(t, f.requiredFieldsOutput, output)
 	})
 }
