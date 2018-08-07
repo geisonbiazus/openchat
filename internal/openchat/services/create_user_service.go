@@ -3,8 +3,10 @@ package services
 import "github.com/geisonbiazus/openchat/internal/openchat"
 
 const (
-	StatusSuccess = "SUCCESS"
-	StatusError   = "ERROR"
+	StatusSuccess          = "SUCCESS"
+	StatusError            = "ERROR"
+	ValidationRequired     = "REQUIRED"
+	ValidationAlreadyTaken = "ALREADY_TAKEN"
 )
 
 type CreateUserInput struct {
@@ -59,15 +61,15 @@ func (s *CreateUserService) validateUser(user openchat.User) []openchat.Error {
 	builder := openchat.NewErrorsBuilder()
 
 	if user.Username == "" {
-		builder.Add("username", "REQUIRED")
+		builder.Add("username", ValidationRequired)
 	}
 
 	if user.Password == "" {
-		builder.Add("password", "REQUIRED")
+		builder.Add("password", ValidationRequired)
 	}
 
 	if s.usernameIsTaken(user.Username) {
-		builder.Add("username", "ALREADY_TAKEN")
+		builder.Add("username", ValidationAlreadyTaken)
 	}
 
 	return builder.Errors

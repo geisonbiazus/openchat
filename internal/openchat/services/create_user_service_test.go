@@ -49,15 +49,15 @@ func TestCreateUserService(t *testing.T) {
 		usernameTakenOutput := CreateUserOutput{
 			Status: StatusError,
 			Errors: []openchat.Error{
-				openchat.Error{Field: "username", Type: "ALREADY_TAKEN"},
+				openchat.Error{Field: "username", Type: ValidationAlreadyTaken},
 			},
 		}
 
 		requiredFieldsOutput := CreateUserOutput{
 			Status: StatusError,
 			Errors: []openchat.Error{
-				openchat.Error{Field: "username", Type: "REQUIRED"},
-				openchat.Error{Field: "password", Type: "REQUIRED"},
+				openchat.Error{Field: "username", Type: ValidationRequired},
+				openchat.Error{Field: "password", Type: ValidationRequired},
 			},
 		}
 
