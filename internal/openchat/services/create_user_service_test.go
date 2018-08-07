@@ -43,8 +43,10 @@ func TestCreateUserService(t *testing.T) {
 		}
 
 		usernameTakenOutput := CreateUserOutput{
-			Status:  StatusError,
-			Message: "Username already taken.",
+			Status: StatusError,
+			Errors: []openchat.Error{
+				openchat.Error{Field: "username", Type: "ALREADY_TAKEN"},
+			},
 		}
 
 		return &fixture{
@@ -60,19 +62,19 @@ func TestCreateUserService(t *testing.T) {
 	t.Run("Create a user", func(t *testing.T) {
 		f := setup()
 		f.service.Run(f.input)
-		assert.Equal(t, f.userRepository.CreatedUser, f.user)
+		assert.DeepEqual(t, f.userRepository.CreatedUser, f.user)
 	})
 
 	t.Run("Return the created user data", func(t *testing.T) {
 		f := setup()
 		output := f.service.Run(f.input)
-		assert.Equal(t, f.successOutput, output)
+		assert.DeepEqual(t, f.successOutput, output)
 	})
 
 	t.Run("Return error message when username has already been taken", func(t *testing.T) {
 		f := setup()
 		f.userRepository.Create(f.user)
 		output := f.service.Run(f.input)
-		assert.Equal(t, f.usernameTakenOutput, output)
+		assert.DeepEqual(t, f.usernameTakenOutput, output)
 	})
 }

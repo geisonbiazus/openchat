@@ -17,3 +17,8 @@ type UserRepository interface {
 type IDGenerator interface {
 	Generate() string
 }
+
+type Error struct {
+	Field string
+	Type  string
+}

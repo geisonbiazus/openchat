@@ -18,7 +18,7 @@ type CreateUserOutput struct {
 	ID       string
 	Username string
 	About    string
-	Message  string
+	Errors   []openchat.Error
 }
 
 type CreateUserService struct {
@@ -71,7 +71,9 @@ func (s *CreateUserService) buildSuccessOutput(user openchat.User) CreateUserOut
 
 func (s *CreateUserService) buildUsernameTakenOutput() CreateUserOutput {
 	return CreateUserOutput{
-		Status:  StatusError,
-		Message: "Username already taken.",
+		Status: StatusError,
+		Errors: []openchat.Error{
+			openchat.Error{Field: "username", Type: "ALREADY_TAKEN"},
+		},
 	}
 }
