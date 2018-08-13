@@ -19,8 +19,8 @@ type IDGenerator interface {
 }
 
 type Error struct {
-	Field string
-	Type  string
+	Field string `json:"field"`
+	Type  string `json:"type"`
 }
 
 type ErrorsBuilder struct {
